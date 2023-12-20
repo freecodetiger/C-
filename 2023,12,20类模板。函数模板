@@ -1,0 +1,50 @@
+#include <iostream>
+#include<cstdlib>
+using namespace std;
+struct student {
+	int id;
+	float gpa;
+};
+template<class T>
+class Store {
+private:
+		T item;//item用来存放任意类型的数据
+		bool havevalue;//havevalue用来标记item是否已经被存入
+public:
+			Store();//无参构造函数
+		T& getElem();//提取数据函数
+		void putElem(const T& x);//存入数据函数
+};
+template<class T>//构造函数的定义
+Store<T>::Store() :havevalue(false) {}
+
+template<class T>
+T& Store<T>::getElem() {
+	if (!havevalue) {//如果试图提取未初始化的数据，则终止程序
+		cout << "No item present!" << endl;
+		exit(1);//使程序完全退出，返回操作系统
+	}
+	return item;
+}
+
+template<class T>//存入数据函数的定义
+void Store<T>::putElem(const T& x) {
+	havevalue = true;
+	item = x;
+}
+int main() {
+	Store<int>s1, s2;//定义两个Store<int>类对象，其中数据成员item为int类型
+	s1.putElem(3);//初始化对象s1,向s1中存入数据3
+	s2.putElem(-7);
+	cout << s1.getElem() << " " << s2.getElem() << endl;
+	//定义student类型结构体变量同时初始化
+	student g = { 1000,23 };
+	Store<student>s3;//定义Store<student>类对象s3，其中数据成员item为student类型
+	s3.putElem(g);
+	cout << "The student id is" << s3.getElem().id << endl;//输出对象s3的数据成员
+
+	Store<double>d;
+	cout << "Retrieving object d...";
+	cout << d.getElem() << endl;//Store<double>类对象d未进行存入数值操作
+	return 0;
+}
