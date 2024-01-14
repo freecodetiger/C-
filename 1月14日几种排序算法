@@ -41,7 +41,7 @@ vector<T> sort_array(const vector<T>& input) {
 	}
 	return sorted_array;
 }
-//插入排序
+//选择排序
 template<typename T>
 vector<T> sort_array(const vector<T>& input) {
 	vector<T>sorted_array = input;
