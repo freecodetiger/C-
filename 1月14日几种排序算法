@@ -9,16 +9,18 @@ using namespace std;
 //{
 //	vector<T> sorted_array = input;
 //	T h;
+//      bool ok;
 //	for (int i = 0; i < sorted_array.size() - 1; i++) {
+//		ok=0;
 //		for (int j = 0; j < sorted_array.size() - 1; j++) {
 //			if (sorted_array[j] > sorted_array[j + 1]) {
 //				h = sorted_array[j + 1];
 //				sorted_array[j + 1] = sorted_array[j];
-//				sorted_array[j] = h;
+//				sorted_array[j] = h;ok=1;
 //			}
-//		}
+//		}if(ok=0){break;}
 //	}
-//	//sort(sorted_array.begin(), sorted_array.end());
+//	(//sort(sorted_array.begin(), sorted_array.end());)
 //	return sorted_array;
 //}
 //第二种冒泡排序
@@ -27,15 +29,15 @@ using namespace std;
 template<typename T>
 vector<T> sort_array(const vector<T>& input) {
 	vector<T> sorted_array = input;
-	T h;
-	for (int j = 1; j < sorted_array.size(); j++) {
+	T h;bool ok;
+	for (int j = 1; j < sorted_array.size(); j++) {ok=0;
 		for (int i = 0; i < sorted_array.size() - j; i++) {
 			if (sorted_array[i] > sorted_array[i + 1]) {
 				h = sorted_array[i + 1];
 				sorted_array[i + 1] = sorted_array[i];
-				sorted_array[i] = h;
+				sorted_array[i] = h;ok=1
 			}
-		}
+		}if(ok=0){break;}
 	}
 	return sorted_array;
 }
