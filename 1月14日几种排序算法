@@ -1,0 +1,50 @@
+#include<iostream>
+#include<vector>
+//#include<algorithm>
+using namespace std;
+//第一种冒泡排序的方法
+// 两层for循环都是一样的循环规律
+//template<typename T>
+//vector<T> sort_array(const vector<T>& input)
+//{
+//	vector<T> sorted_array = input;
+//	T h;
+//	for (int i = 0; i < sorted_array.size() - 1; i++) {
+//		for (int j = 0; j < sorted_array.size() - 1; j++) {
+//			if (sorted_array[j] > sorted_array[j + 1]) {
+//				h = sorted_array[j + 1];
+//				sorted_array[j + 1] = sorted_array[j];
+//				sorted_array[j] = h;
+//			}
+//		}
+//	}
+//	//sort(sorted_array.begin(), sorted_array.end());
+//	return sorted_array;
+//}
+//第二种冒泡排序
+//灵感来自先进行第一轮交换
+//每一轮交换循环次数减1，直到只比较前两个数
+template<typename T>
+vector<T> sort_array(const vector<T>& input) {
+	vector<T> sorted_array = input;
+	T h;
+	for (int j = 1; j < sorted_array.size(); j++) {
+		for (int i = 0; i < sorted_array.size() - j; i++) {
+			if (sorted_array[i] > sorted_array[i + 1]) {
+				h = sorted_array[i + 1];
+				sorted_array[i + 1] = sorted_array[i];
+				sorted_array[i] = h;
+			}
+		}
+	}
+	return sorted_array;
+}
+int main() {
+	vector<int>arr = { 3,5,2,1,6,4 };
+	vector<int>sorted_array = sort_array(arr);
+	for (int i = 0; i < arr.size(); i++) {
+		cout << sorted_array[i] << endl;
+		// cout << sort_array(arr)[i];
+	}
+	return 0;
+}
