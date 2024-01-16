@@ -1,0 +1,30 @@
+//#include <algorithm>
+#include <iostream>
+
+template<class InputIt, class T>
+InputIt find(InputIt first, InputIt last, const T& value) {
+    while (first != last) {
+        if (*first == value) {
+            return first;
+        }
+        first++;
+    }
+    return last;
+}
+
+int main() {
+    int arr[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    int size = sizeof(arr) / sizeof(arr[0]);
+    int val = 5;
+
+    // 使用 find 函数查找 val 在 arr 中的位置
+    auto it = find(arr, arr + size, val);//auto在这里为整型指针
+    if (it != arr + size) {
+        std::cout << "Element found at index: " << it - arr << std::endl;
+    }
+    else {
+        std::cout << "Element not found" << std::endl;
+    }
+
+    return 0;
+}
