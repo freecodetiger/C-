@@ -1,0 +1,356 @@
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include "u1.h"
+#include "s1.h"
+#include "e1.h"
+#include "e3.h"
+#include "s5.h"
+#include "s6.h"
+#include "e2.h"
+#include "s2.h"
+#include "delay.h"
+// 数码管显示字符数组
+char buf[10] = {0};
+
+// 加速度数据
+s2_imu_t a;
+
+// 获取加速度整型
+int k = 0;
+
+// RGB
+double red = 0;
+double blue = 0;
+double green = 0;
+
+// 行车状态
+int m = 0;
+
+// 距离正则化
+int dis = 0;
+// 距离
+int distance = 0;
+
+// 字符数组（转弯程度+行车速度）
+char s1[10] = {0};
+char s2[10] = {0};
+
+// card状态
+int card = 0;
+// 亮度
+int light = 0;
+// 湿度
+int humi = 0;
+
+// 温湿度
+s2_ths_t ths_value;
+// 卡类型
+unsigned char CardType[2] = {0};
+// 卡ID（全球唯一）
+unsigned char CardID[4] = {0};
+// 卡密码
+unsigned char Key[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+// 数据缓冲
+char Data[16] = {0};
+// 电量
+double charge = 25.00;
+
+// 初始化函数
+void init()
+{
+    u1_timer0_init();
+    s2_imu_info = s2_imu_init();
+    e1_tube_info = e1_tube_init();
+    e3_curtain_info = e3_curtain_init();
+    // 窗帘机初始化位置为中间
+    e3_curtain_position_set(e3_curtain_info, 50);
+    e1_led_info = e1_led_init();
+    e1_led_rgb_set(e1_led_info, 0, 0, 0);
+    e1_tube_str_set(e1_tube_info, "");
+    s6_ultrasonic_info = s6_ultrasonic_init();
+    s2_illuminance_info = s2_illuminance_init();
+    s2_ths_info = s2_ths_init();
+    e2_fan_info = e2_fan_init();
+    e2_fan_speed_set(e2_fan_info, 0);
+    s5_nfc_info = s5_nfc_init();
+    strcpy(buf,"");
+    k=0;
+    strcpy(s1,"");
+    strcpy(s2,"");
+    card = 0;
+    humi=0;
+    charge = 25.00;
+    m = 0;
+    dis = 0;
+    distance = 0;
+    red = 0;
+    green = 0;
+    blue = 0;
+    light = 0;
+}
+
+// 获取x方向加速度用于转弯，返回转弯程度字符数组
+char *turn()
+{
+
+    s2_imu_t a = s2_imu_value_get(s2_imu_info);
+    k = a.acc_x;
+    k = abs(k);
+    // 根据x轴加速度改变窗帘机位置
+    e3_curtain_position_set(e3_curtain_info, 50 + a.acc_x * 5);
+    sprintf(s1, "%d", k * 5);
+    return s1;
+}
+
+// 获取前方障碍距离用于控制速度，返回正则化速度的字符数组
+char *speed_distance()
+{
+    distance = 0.2 * s6_ultrasonic_distance_get(s6_ultrasonic_info); // 1cm
+    dis = distance - 250 * 0.2;
+    // dis在0-100之间的时候，开启避障模式，根据障碍物距离改变车速
+    if (dis > 0 && dis < 100)
+    {
+        sprintf(s2, "%d", dis);
+        e2_fan_speed_set(e2_fan_info, dis);
+    }
+    // dis在100之外时，开启恒速模式
+    else if (dis > 100)
+    {
+        sprintf(s2, "%d", 99);
+        e2_fan_speed_set(e2_fan_info, 100);
+    }
+    // dis为负数时，停车（因为硬件有精度和范围限制，特设置此情况）
+    else
+    {
+        sprintf(s2, "%d", 0);
+        e2_fan_speed_set(e2_fan_info, 0);
+    }
+    return s2;
+}
+
+// 数码管显示函数
+void tube_set(char *str1, char *str2)
+{
+    char buf[10] = {0};
+    // strcpy(buf, "");
+    strcat(buf, str1);
+    strcat(buf, str2);
+    e1_tube_str_set(e1_tube_info, buf);
+}
+
+/*风扇：车速；
+窗帘机：转向；
+六轴：操纵；
+超声波：避障；
+NFC：开机；倒车
+温湿度：雨天雾灯；
+照度：夜间远光灯；*/
+
+int main(void)
+{
+    init();
+    e1_tube_str_set(e1_tube_info, "HELO");
+    delay_ms(1000);
+    while (1)
+    {
+        switch (card)
+        {
+        // 寻卡状态
+        case 0:
+            // 寻找射频场内所有符合ISO 14443-A协议且未休眠的卡(0x26)，寻卡成功后将卡的类型写入CardType
+            if (s5_nfc_request(s5_nfc_info, 0x26, CardType) == MI_OK)
+            {
+                // 如果寻卡成功，显示卡的类型
+                sprintf(Data, "%02x%02x", CardType[0], CardType[1]);
+                e1_tube_str_set(e1_tube_info, Data);
+                delay_ms(2000);
+                // 如果寻卡成功，进入防冲撞状态
+                card = 1;
+            }
+            else
+            {
+                // 如果寻卡失败，保持寻卡状态
+                card = 0;
+                // 未刷卡状态下，初始化车速，灯光，行车状态
+                if (m == 0)
+                {
+                    e2_fan_speed_set(e2_fan_info, 0);
+                    e1_led_rgb_set(e1_led_info, 0, 0, 0);
+                    e1_tube_str_set(e1_tube_info, "HELO");
+                    delay_ms(1000);
+                }
+                // 进入行车模式
+                if (m == 1)
+                {
+                    // start
+                    tube_set(turn(), speed_distance());
+
+                    light = s2_illuminance_value_get(s2_illuminance_info); // 获取照度
+
+                    ths_value = s2_ths_value_get(s2_ths_info);
+                    // int temp = ths_value.temp;
+                    humi = ths_value.humi; // 获取湿度
+
+                    // 夜间（根据dis判断远光近光）及雾灯模式（根据humi判断是否开启雾灯）
+                    if (light < 150)
+                    {
+                        if (dis > 50)
+                        {
+                            if (humi > 60)
+                            {
+                                e1_led_rgb_set(e1_led_info, 100, 100, 0);
+                            }
+                            else
+                            {
+                                e1_led_rgb_set(e1_led_info, 100, 100, 100);
+                            }
+                        }
+                        else
+                        {
+                            if (humi > 60)
+                            {
+                                e1_led_rgb_set(e1_led_info, 20, 20, 0);
+                            }
+                            else
+                            {
+                                e1_led_rgb_set(e1_led_info, 20, 20, 20);
+                            }
+                        }
+                    }
+                    else
+                    { // light
+                        if (humi > 60)
+                        {
+                            e1_led_rgb_set(e1_led_info, 20, 20, 0);
+                        }
+                        else
+                        {
+                            e1_led_rgb_set(e1_led_info, 0, 0, 0);
+                        }
+                    }
+                } // m = 1
+
+
+                // 进入倒车入库模式
+                if (m == 2)
+                {
+                    // garbage
+                    tube_set(turn(), speed_distance());
+                    e1_led_rgb_set(e1_led_info, 100 - dis, 0, 0);
+                    if (dis == 0)
+                    {
+                        e1_tube_str_set(e1_tube_info, "OFF");
+                        e2_fan_speed_set(e2_fan_info, 0);
+                        e1_led_rgb_set(e1_led_info, 0, 0, 0);
+                        delay_ms(2000);
+                        m = 0;
+                    }
+                } // m = 2
+            }
+            break;
+
+        // 防冲撞状态
+        case 1:
+            // 通过防冲撞机制选择射频场内的一张卡，防冲撞成功后将选中的卡的ID写入CardID
+            if (s5_nfc_anticoll(s5_nfc_info, CardID) == MI_OK)
+            {
+                // 如果防冲撞成功，显示卡的ID
+                sprintf(Data, "%02x%02x%02x%02x", CardID[0], CardID[1], CardID[2], CardID[3]);
+                e1_tube_str_set(e1_tube_info, Data);
+                delay_ms(2000);
+
+                // 如果防冲撞成功，进入选卡状态
+                card = 2;
+            }
+            else
+            {
+                // 如果防冲撞失败，回到寻卡状态
+                card = 0;
+            }
+            break;
+        case 2:
+            // 选中ID为CardID的卡
+            if (s5_nfc_select(s5_nfc_info, CardID) == MI_OK)
+            {
+                // 如果选卡成功，进入认证/休眠状态
+                card = 3;
+            }
+            else
+            {
+                // 如果选卡失败，回到寻卡状态
+                card = 0;
+            }
+            break;
+
+        // 认证状态
+        case 3:
+            // 使用秘钥A(0x60)认证ID为CardID的卡的第5块（第1区的第1块），认证密码为Key
+            if (s5_nfc_auth(s5_nfc_info, 0x60, 5, Key, CardID) == MI_OK)
+            {
+                // 显示电量
+                sprintf(buf, "%.2f", charge);
+                e1_tube_str_set(e1_tube_info, buf);
+                delay_ms(2000);
+
+                // 判断是否充电
+                if (charge >= 20)
+                {
+                    if (m == 0)
+                    {
+                        m = 1;
+                        // 开锁
+                        e1_tube_str_set(e1_tube_info, "CAR");
+                        delay_ms(2000);
+                    }
+
+                    else if (m == 1)
+                    {
+                        m = 2;
+                    }
+                }
+                else
+                {
+                    e1_tube_str_set(e1_tube_info, "WAIT");
+                    delay_ms(2000);
+                    while (charge < 80)
+                    {
+                        sprintf(buf, "%.2f", charge);
+                        e1_tube_str_set(e1_tube_info, buf);
+                        charge += 5;
+                        delay_ms(1000);
+                    }
+                    e1_tube_str_set(e1_tube_info, "OK");
+                    delay_ms(2000);
+                }
+                card = 4;
+            }
+            else
+            {
+                // 如果认证失败，回到寻卡状态
+                card = 0;
+            }
+            break;
+        case 4:
+            // 休眠当前选中的卡
+            if (s5_nfc_halt(s5_nfc_info) == MI_OK)
+            {
+                // 如果休眠成功，回到寻卡状态
+                card = 0;
+            }
+            else
+            {
+                // 如果休眠失败，回到寻卡状态
+                card = 0;
+            }
+            break;
+
+        default:
+            break;
+
+        } // switch
+        // 电量减少
+        charge -= 0.01;
+        delay_ms(50);
+    } //while
+}
