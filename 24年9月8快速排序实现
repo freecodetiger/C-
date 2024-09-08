@@ -18,6 +18,23 @@ if(i<j)swap(a[i],a[j]);
     quicksort(a,left,j);
     quicksort(a,j+1,right);
 }
+//双数组法快速排序实现
+//归并排序实现
+void mergesort(int a[],int left,int right){
+if(left>=right){return;}
+int mid=(left+right)/2;
+mergesort(a,left,mid);
+mergesort(a,mid+1,right);
+int i=left,j=mid+1;
+int k=0;
+while(i<=mid&&j<=right){
+if(a[i]<=a[j]){temp[k]=a[i];k++;i++}
+else{temp[k]=a[j];k++;j++}
+}
+while(i<mid){temp[k]=a[i];k++;i++}
+while(j<right){temp[k]=a[j];k++;j++}
+for(i=left,j=0;i<=right;i++,j++){a[i]=temp[j];}
+}
 int main()
 {//重复默写代码
 //快速排序算法，分而治之
