@@ -1,0 +1,29 @@
+#include<iostream>
+#include<math.h>
+using namespace std;
+
+//双指针法，快排
+void quicksort(int a[],int left,int right){
+    if(left>=right){
+        return;
+    }
+    int i=left-1;
+    int j=right+1;
+    int key=a[left];
+   while(i<j){
+do(i++);while(a[i]<key);
+do(j--);while(a[j]>key);
+if(i<j)swap(a[i],a[j]);
+   }
+    quicksort(a,left,j);
+    quicksort(a,j+1,right);
+}
+int main()
+{//重复默写代码
+//快速排序算法，分而治之
+int a[10]={1,3,5,7,9,2,4,6,8,0};
+quicksort(a,0,9);
+for(int i=0;i<10;i++){
+    cout<<a[i]<<" ";
+}
+}
