@@ -1,0 +1,20 @@
+用户输入一个范围在[-10000,10000]的浮点数，输出这个浮点数的立方根
+#include <iostream>
+using namespace std;
+double l,r,n,mid;
+double q(double a){return a*a*a;}
+
+int main(){
+    cin>>n;
+    l=-100,r=100;//使用浮点数二分法，直到误差小于1e-7为止。
+    while(r-l>=1e-7){
+        mid=(l+r)/2;
+        if(q(mid)>=n){
+            r=mid;
+        }else{
+            l=mid;
+        }
+    }
+    printf("%.6f",l);
+    return 0;
+}
