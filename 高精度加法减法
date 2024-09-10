@@ -1,0 +1,38 @@
+//高精度加法实现
+#include <iostream>
+#include <vector>
+using namespace std;
+const int n=100010;
+vector<int> a,b;
+vector<int> add(vector<int>&a,vector<int>&b){
+    //容器里面的数字已经按照个位在前依次排列了
+    //个位相加，大于10进1，模10得出本位，除10得出进位（0or1）
+    int t,l,r;
+    vector<int>c;
+    while(l<=a.size()||r<=b.size()){
+        if(l<a.size()){t+=a[l];}//不超过a的范围
+        if(r<b.size()){t+=b[r];}//不超过b的范围
+        c.push_back(t%10);
+        t=t/10;
+        l++,r++;
+    }
+    if(t)c.push_back(t);//最后的余数要加上
+    return c;
+}
+
+int main(){
+    string m,n;
+    cin>>m>>n;
+    for(int i=m.size()-1;i>=0;i--){
+        a.push_back(m[i]-'0');
+    }
+    for(int i=n.size()-1;i>=0;i--){
+        b.push_back(n[i]-'0');
+    }
+    auto ans=add(a,b);
+    for(int i=ans.size()-1;i>=0;i--){
+        cout<<ans[i];
+    }
+    
+    return 0;
+}
