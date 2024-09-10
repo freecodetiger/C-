@@ -17,6 +17,7 @@ vector<int> add(vector<int>&a,vector<int>&b){
         l++,r++;
     }
     if(t)c.push_back(t);//最后的余数要加上
+
     return c;
 }
 
@@ -35,4 +36,37 @@ int main(){
     }
     
     return 0;
+}
+高精度除法：
+vector<int>div(vector<int>&A,intb,int&r)//高精度A，低精度b，余数r
+{
+vector<int>C;//答案
+r=0;
+for(inti=A.size()-1;i>=0;i--)
+{
+r=r*10+A[i];//补全r>=b
+C.push_back(r/b);//取当前位的答案
+r%=b;//r%b为下一次计算
+}
+reverse(C.begin(),C.end());//倒序为答案
+while(C.size()>1&&C.back()==0)C.pop_back();//去除前导零
+return C;
+}
+高精度除法（高精度除低精度）：
+vector<int> sum(vector<int> &a,int b){
+    //容器内的整数已经按照个位数在前依次排列了
+    //a[i]-b[i]-t,其中，本位是模10的结果，t/10是进位
+    //这里要考虑结果正负，在输入中调整，保证a大于b
+    int i=0,t=0;
+    vector<int>c;
+    for(i=0;i<a.size();i++){
+        t=a[i]*b+t;
+        c.push_back(t%10);
+        t=t/10;
+    }
+    c.push_back(t);
+    while(c.back()==0&&c.size()>1){
+        c.pop_back();
+    }
+    return c;
 }
