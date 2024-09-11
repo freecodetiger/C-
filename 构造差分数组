@@ -27,3 +27,44 @@ int main(){
 
     return 0;
 }
+//二维差分 
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int N=1010;
+int a[N][N];
+int b[N][N];
+int main(){
+    int m=0,n=0;
+    int x,q;
+    cin>>n>>m>>q;
+    for(int i=1;i<=n;i++){
+       for(int j=1;j<=m;j++){
+           cin>>x;
+           a[i][j]=x;
+           b[i][j]=a[i][j]-a[i][j-1]-a[i-1][j]+a[i-1][j-1];
+       }
+    }
+    int x1,y1,x2,y2,c;
+    while(q--){
+        cin>>x1>>y1>>x2>>y2>>c;
+          b[x1][y1]+=c;
+        b[x1][y2+1]-=c;
+        b[x2+1][y1]-=c;
+        b[x2+1][y2+1]+=c;
+    }
+    for(int i=1;i<=n;i++){
+        for(int j=1;j<=m;j++){
+            a[i][j]=a[i][j-1]+a[i-1][j]-a[i-1][j-1]+b[i][j];
+            cout<<a[i][j]<<((j==m)?'\n':' ');
+        }
+    }
+
+    return 0;
+}
+
+作者：西风烈
+链接：https://www.acwing.com/activity/content/code/content/8844150/
+来源：AcWing
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
