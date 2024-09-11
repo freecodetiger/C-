@@ -1,0 +1,23 @@
+#include<iostream>
+#include<cstdio>
+using namespace std;
+const int N=1e5+10;
+int a[N],sum[N];//这里两个数组第一位都是0，从索引1开始有数字
+int main()
+{
+    int n,m,x;
+    cin>>n>>m;//数组长度为n，查询m次
+    for(int i=1;i<=n;i++)
+    {
+        cin>>a[i];
+        sum[i]=sum[i-1]+a[i];
+       //从i等于1开始，sum[0]被默认初始化为0
+    }
+    while(m--)//当m>0时进入循环体，循环m次，循环结束后m=-1
+    {
+        int l,r;
+        cin>>l>>r;
+        cout<<sum[r]-sum[l-1]<<endl;
+    }
+    return 0;
+}
