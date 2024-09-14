@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define endl '\n'
+#define IOS ios::sync_with_stdio(0); cin.tie(0); cout.tie(0)
+#define pb push_back
+
+#define Yes cout << "Yes\n"
+#define No cout << "No\n"
+#define YES cout << "YES\n"
+#define NO cout << "NO\n"
+#define ff first
+#define ss second
+#define fori(x,y) for(int i=x;i<=(int)(y);++i)
+#define forj(x,y) for(int j=x;j<=(int)(y);++j)
+#define fork(x,y) for(int k=x;k<=(int)(y);++k)
+
+#define debug(x) cout << #x << " = " << x << endl
+
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+
+ll MOD = 998244353;
+ll qpow(ll a,ll p) {ll res=1; while(p) {if (p&1) {res=res*a%MOD;} a=a*a%MOD; p>>=1;} return res;}
+
+const int N = 2e5+7;
+//以上都是祯哥的装逼代码
+ll pos[N], arr[N], sum[N];
+void solve() {
+    int n;
+    cin >> n;
+    fori(1, n) cin >> pos[i];
+    fori(1, n) cin >> arr[i];
+    fori(1, n) sum[i] = sum[i-1]+arr[i];//求前缀和数组
+    int q;
+    cin >> q;
+    while (q--) {
+        int u, v;
+        cin >> u >> v;
+        int idx1 = lower_bound(pos+1, pos+n+1, u)-pos;//找到第一个不小于u的坐标位置
+        int idx2 = upper_bound(pos+1, pos+n+1, v)-pos-1;//找到第一个不小于v的坐标位置
+        cout << sum[idx2]-sum[idx1-1] << endl;//输出两坐标之间村庄人口数目和
+    }
+}
+
+signed main() {
+    IOS;
+    int t = 1;
+    while (t--) {
+        solve();
+    }
+    return 0;
+}
