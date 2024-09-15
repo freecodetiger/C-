@@ -1,0 +1,54 @@
+#include <iostream>
+using namespace std;
+int head;
+const int N=100100;
+//值得注意的是，第k个元素的索引是k-1；
+int e[N],ne[N];//e[N]用来存放元素具体值，ne[i]用来存放下标为i的值的下一个下标
+int idx;//下标，每次增加一个元素，下标随之加1
+void init(){
+    head=-1;//初始时，头结点指向-1，表示没有具体的下一个元素
+    idx=0;//索引为0，等待第一个元素来承担这个索引。
+}
+//将元素添加到头结点之后
+void add_head(int x){
+    e[idx]=x;//索引0存放第一个元素x
+    ne[idx]=head;//元素x索引的下一个索引指向索引为head，也即头结点后第一个元素的索引。
+    head=idx;//head不再指向-1或者ne[head],而是指向idx，也即新增加元素的索引，这两步操作将head和head后元素的关系拉远了一步，插入了一个x。
+    idx++;//每次增加元素都应该增加索引的大小
+}
+//删除索引为k的元素的后一个元素
+void dele(int k){
+    ne[k]=ne[ne[k]];//删除索引k元素后一个元素，只需要让这个元素的ne指向下一个元素的索引即可。
+}
+void insert(int k,int x){
+    e[idx]=x;
+    ne[idx]=ne[k];
+    ne[k]=idx;
+    idx++;
+}
+int main() {
+    init();
+    int n;
+    cin>>n;
+    while(n--){
+        char c;
+        int k,m;
+        cin>>c;
+        if(c=='H'){
+            cin>>k;
+            add_head(k);
+        }else if(c=='D'){
+            cin>>k;
+            if(k==0){
+                head=ne[head];
+            }else{dele(k-1);}
+        }else if(c=='I'){
+            cin>>k>>m;
+            insert(k-1,m);
+        }
+    }
+    for(int i=head;i!=-1;i=ne[i]){
+        cout<<e[i]<<" ";
+    }
+    
+}
