@@ -1,0 +1,56 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstdio>
+#include <sstream>
+using namespace std;
+
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        vector<int> ans;
+        for(int i=0;i<(int)nums.size();i++){
+            for(int j=i+1;j<(int)nums.size();j++){
+                if(nums[i]+nums[j]==target){
+                    ans.push_back(i);
+                    ans.push_back(j);
+                    return ans;}
+   
+}
+        }
+if(ans.empty()){
+    ans.push_back(-1);
+    ans.push_back(-1);
+    return ans;
+}
+      return ans;  }
+    
+};
+int main(){
+    Solution s;
+    vector<int> nums;
+    int target=0;
+    int num;
+    string line;
+    freopen("in.txt","r",stdin);
+    if (getline(cin, line)) {
+        istringstream iss(line);
+        int number;
+        // 将第一行的数字读入动态数组
+        while (iss >> number) {
+            nums.push_back(number);
+        }
+    }
+
+    // 读取第二行
+    if (getline(cin, line)) {
+        istringstream iss(line);
+        iss >> target; // 将第二行的数字读入target
+    }
+    cin>>target;
+    vector<int> ans=s.twoSum(nums,target);
+    for(int i=0;i<(int)ans.size();i++){
+        cout<<ans[i]<<" ";
+    }
+    return 0;
+}
