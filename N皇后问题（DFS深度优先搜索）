@@ -1,0 +1,70 @@
+```
+#include <iostream>
+using namespace std;
+
+const int N = 10;
+int n;
+//bool state_hang[N], state_lie[N];//不需要额外处理行列
+int line[N][N]; // To track attacks
+char a[N][N]; // The chessboard
+
+void brushline(int x, int y) {
+    //这个函数用来处理行列，对角线的受到攻击数
+    for (int i = 0; i < n; i++) {
+        line[x][i]++; // Row attack
+        line[i][y]++; // Column attack
+        if (x + i < n && y + i < n) line[x + i][y + i]++; 
+        if (x + i < n && y - i >= 0) line[x + i][y - i]++; 
+        if (x - i >= 0 && y + i < n) line[x - i][y + i]++; 
+        if (x - i >= 0 && y - i >= 0) line[x - i][y - i]++; 
+    }
+}
+
+void ubrushline(int x, int y) {
+    //恢复现场
+    for (int i = 0; i < n; i++) {
+        line[x][i]--; // Row attack
+        line[i][y]--; // Column attack
+        if (x + i < n && y + i < n) line[x + i][y + i]--; 
+        if (x + i < n && y - i >= 0) line[x + i][y - i]--; 
+        if (x - i >= 0 && y + i < n) line[x - i][y + i]--; 
+        if (x - i >= 0 && y - i >= 0) line[x - i][y - i]--; 
+    }
+}
+
+void dfs(int u) {
+    if (u == n) { // All queens placed
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                cout << a[i][j];
+            }
+            cout << endl;
+        }
+        cout << endl;
+        return;
+    }
+    for(int j=0;j<n;j++){
+        //这个for的写法，是因为没必要考虑皇后重复放在一个格子，因为brushline函数已经包含了皇后所在的格子
+        if(line[u][j]==0){
+            a[u][j]='Q';
+            brushline(u,j);
+            dfs(u+1);
+            a[u][j]='.';
+            ubrushline(u,j);
+        }
+    }
+}
+
+int main() {
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            a[i][j] = '.'; // Initialize board
+        }
+    }
+
+    dfs(0); // Start from the first row
+
+    return 0;
+}
+```
