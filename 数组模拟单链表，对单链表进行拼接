@@ -1,0 +1,82 @@
+//题目：某非空单链表L中所有元素为整数，设计一个算法将所有小于零的节点移到所有大于等于零的节点的前面。
+
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+const int N = 100100;
+int e[N], ne[N], head, idx;
+
+void init() {
+    head = -1; // 初始化链表为空
+    idx = 0;   // 索引初始化
+}
+
+void insert(int x) {
+    e[idx] = x; // 插入元素
+    ne[idx] = head; // 指向当前头节点
+    head = idx++; // 更新头指针
+}
+
+void sortList() {
+    int lessHead = -1, lessTail = -1; // 小于0的链表
+    int greaterHead = -1, greaterTail = -1; // 大于等于0的链表
+
+    for (int i = head; i != -1; i = ne[i]) {
+        if (e[i] < 0) {
+            // 处理小于0的节点
+            if (lessHead == -1) {
+                lessHead = i; // 头节点
+                lessTail = i; // 尾节点
+            } else {
+                ne[lessTail] = i; // 连接尾节点
+                lessTail = i; // 更新尾节点
+            }
+        } else {
+            // 处理大于等于0的节点
+            if (greaterHead == -1) {
+                greaterHead = i; // 头节点
+                greaterTail = i; // 尾节点
+            } else {
+                ne[greaterTail] = i; // 连接尾节点
+                greaterTail = i; // 更新尾节点
+            }
+        }
+    }
+
+    // 连接两个链表
+    if (lessTail != -1) {
+        ne[lessTail] = greaterHead; // 小于0的尾指向大于0的头
+        head = lessHead; // 更新头指针
+    } else {
+        head = greaterHead; // 如果没有小于0的节点，直接使用大于0的链表
+    }
+    
+    // 结束链表
+    if (greaterTail != -1) {
+        ne[greaterTail] = -1; // 确保大于0的链表正确结束
+    }
+}
+
+void printList() {
+    for (int i = head; i != -1; i = ne[i]) {
+        cout << e[i] << " ";
+    }
+    cout << endl;
+}
+
+int main() {
+    init();
+    int n;
+    cin >> n; // 输入节点数量
+    while (n--) {
+        int x;
+        cin >> x; // 输入元素
+        insert(x);
+    }
+
+    sortList(); // 排序链表
+    printList(); // 打印结果
+
+    return 0;
+}
