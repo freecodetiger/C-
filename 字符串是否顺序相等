@@ -1,0 +1,37 @@
+//比如abcdef 和cdefab这两个字符串是“顺序相等”的
+//基本思路就是创建一个两倍长度+1的字符数组，将第二个字符串两次加入这个字符数组，利用标准库中的strncmp(str+i,str1,len1)来逐一比较是否匹配
+
+#include <iostream>
+//#include <string.h>
+#include <cstring>
+using namespace std;
+bool areCyclicEqual(char str1[], char str2[]);
+int main(){
+    char str1[100], str2[100];
+    cin>>str1>>str2;
+    if(areCyclicEqual(str1,str2)){
+        cout<<"yes"<<endl;
+    }else{
+        cout<<"no"<<endl;
+    }
+    return 0;
+}
+
+bool areCyclicEqual(char str1[], char str2[]){   
+    int len1=strlen(str1);
+    int len2=strlen(str2);
+    if(len1!=len2)return false;//长度不同直接返回false
+    char str[len1*2+1];//加1是因为害怕有'\0'字符或者别的什么原因导致越界
+    for(int i=0;i<len1;i++){
+        str[i]=str2[i];
+        str[i+len1]=str2[i];//把str2复制两遍
+    }
+    // strcpy(str,str2);
+    // ctrcat(str,str2);
+    for(int i=0;i<len2;i++){
+        if(strncmp(str+i,str1,len1)==0){
+            return true;
+        }
+    }
+    return false;
+}
