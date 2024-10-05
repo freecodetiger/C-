@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+using namespace std;
+
+// 定义一个整数类型的vector，用于存储用户输入的数字
+vector<int> nums; 
+// 定义一个整数n，用于存储用户输入的数字的数量
+int n; 
+// 定义一个整数best_max_sum，用于存储找到的最小最大组 和，初始值设为一个很大的数
+int best_max_sum = 0x3f3f3f3f; 
+
+// 定义一个深度优先搜索函数，用于递归地将数字分配到两个组中 
+void dfs(int index, int group1_sum, int group2_sum) {
+    // 如果所有数字都已经分配完毕（index等于n），则更新最小最大组 和
+    if (index == n) {
+        // 计算两个组中的最大和
+        int max_group_sum = max(group1_sum, group2_sum);
+        // 更新找到的最小最大组 和
+        best_max_sum = min(best_max_sum, max_group_sum);
+        return;
+    }
+    
+    // 尝试将当前数字加入到第一组，并递归处理下一个数字
+    dfs(index + 1, group1_sum + nums[index], group2_sum);
+    
+    // 尝试将当前数字加入到第二组，并递归处理下一个数字
+    dfs(index + 1, group1_sum, group2_sum + nums[index]);
+    
+    // 剪枝：如果当前任何一个组的和已经大于等于已找到的最小最大组 和，则无需继续当前分支的递归
+    if (max(group1_sum, group2_sum) >= best_max_sum) {
+        return;
+    }
+}
+
+// 定义一个函数，用于启动深度优先搜索，并返回最小最大组 和
+int find_min_sum_of_two_groups() {
+    // 从第一个数字开始，两个组的和都是0
+    dfs(0, 0, 0);
+    // 返回找到的最小最大组 和
+    return best_max_sum;
+}
+
+int main() {
+    // 读取用户输入的数字的数量
+    cin >> n;
+    // 根据数量调整vector的大小
+    nums.resize(n);
+    // 读取用户输入的每个数字
+    for (int i = 0; i < n; ++i) {
+        cin >> nums[i];
+    }
+    // 调用函数找到最小最大组 和，并存储结果
+    int result = find_min_sum_of_two_groups();
+    // 输出结果
+    cout << result << endl;
+    // 程序结束
+    return 0;
+}
