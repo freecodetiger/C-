@@ -1,0 +1,26 @@
+#include <iostream>
+#include <string>
+using namespace std;
+int main() {
+    string s, t;
+    freopen("in.txt", "r", stdin);
+    cin >> s>> t;
+
+    int maxLength = 0;
+    string result;
+    int minLength = min(s.length(), t.length());
+
+    for (int len = 1; len <= minLength; len++) {
+        //substr()函数可以提取字符串中的子串
+        if (s.substr(0, len) == t.substr(t.length() - len, len)) {
+            maxLength = len;
+            result = s.substr(0, len);
+        }
+    }
+    
+    cout << result <<" ";
+    cout << maxLength;
+    
+    fclose(stdin);
+    return 0;
+}
