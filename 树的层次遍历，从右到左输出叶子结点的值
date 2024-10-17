@@ -1,0 +1,56 @@
+//节点存储字符，要求从右到左输出叶子节点的值（递归回溯）
+#include <iostream>
+
+// 定义二叉树的节点结构
+struct TreeNode {
+    char value;
+    TreeNode *left;
+    TreeNode *right;
+
+    // 构造函数
+    TreeNode(char val) : value(val), left(nullptr), right(nullptr) {}
+};
+
+// 辅助函数：检查节点是否是叶子节点
+bool isLeaf(TreeNode *node) {
+    return node != nullptr && node->left == nullptr && node->right == nullptr;
+}
+
+// 从右到左输出所有叶子节点的函数
+void printLeavesFromRightToLeft(TreeNode *root) {
+    if (root == nullptr) return;
+
+    // 先访问右子树
+    printLeavesFromRightToLeft(root->right);
+
+    // 如果当前节点是叶子节点，则输出
+    if (isLeaf(root)) {
+        std::cout << root->value << " ";
+    }
+
+    // 最后访问左子树
+    printLeavesFromRightToLeft(root->left);
+}
+
+int main() {
+    // 构建示例二叉树
+    //       A
+    //      / \
+    //     B   C
+    //    / \   \
+    //   D   E   F
+    TreeNode *root = new TreeNode('A');
+    root->left = new TreeNode('B');
+    root->right = new TreeNode('C');
+    root->left->left = new TreeNode('D');
+    root->left->right = new TreeNode('E');
+    root->right->right = new TreeNode('F');
+
+    // 从右到左输出所有叶子节点
+    printLeavesFromRightToLeft(root);
+
+    // 释放二叉树内存（省略，实际使用时应包含）
+
+    return 0;
+}
+//最后输出：F E D
