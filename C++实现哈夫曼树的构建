@@ -1,0 +1,98 @@
+//优先队列，每次取出两个最小的值作为左右子树的根节点，先序遍历，向左就在字符串末尾拼0，向右拼1，遇到叶子节点就输出哈夫曼编码。
+#include <iostream>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+// 哈夫曼树节点结构
+struct HuffmanNode {
+    char character;         // 字符
+    int weight;            // 权值
+    HuffmanNode* left;     // 左子节点
+    HuffmanNode* right;    // 右子节点
+
+    // 构造函数
+    HuffmanNode(char ch, int w) : character(ch), weight(w), left(nullptr), right(nullptr) {}
+};
+
+// 比较器，用于优先队列（最小堆）
+struct Compare {
+    bool operator()(HuffmanNode* a, HuffmanNode* b) {
+        return a->weight > b->weight; // 权值小的优先级高
+    }
+};
+
+// 构建哈夫曼树
+HuffmanNode* buildHuffmanTree(const vector<pair<char, int>>& frequencies) {
+    priority_queue<HuffmanNode*, vector<HuffmanNode*>, Compare> minHeap;
+
+    // 将所有字符及其权值插入优先队列
+    for (const auto& pair : frequencies) {
+        minHeap.push(new HuffmanNode(pair.first, pair.second));
+    }
+
+    // 合并节点直到只剩下一个根节点
+    while (minHeap.size() > 1) {
+        HuffmanNode* left = minHeap.top(); minHeap.pop(); // 权值最小的节点
+        HuffmanNode* right = minHeap.top(); minHeap.pop(); // 权值第二小的节点
+
+        // 创建新节点，权值为左右子节点之和
+        HuffmanNode* newNode = new HuffmanNode('\0', left->weight + right->weight);
+        newNode->left = left;
+        newNode->right = right;
+
+        // 将新节点插入优先队列
+        minHeap.push(newNode);
+    }
+
+    return minHeap.top(); // 返回根节点
+}
+
+// 先序遍历哈夫曼树并输出编码
+void generateHuffmanCodes(HuffmanNode* root, const string& code) {
+    if (!root) return;
+
+    // 如果是叶子节点，输出字符及其哈夫曼编码
+    if (!root->left && !root->right) {
+        cout << root->character << ": " << code << endl;
+        return;
+    }
+
+    // 遍历左子树和右子树
+    generateHuffmanCodes(root->left, code + "0");
+    generateHuffmanCodes(root->right, code + "1");
+}
+
+// 释放哈夫曼树内存
+void deleteHuffmanTree(HuffmanNode* root) {
+    if (root) {
+        deleteHuffmanTree(root->left);
+        deleteHuffmanTree(root->right);
+        delete root;
+    }
+}
+
+int main() {
+    // 示例：字符及其权值
+    vector<pair<char, int>> frequencies = {
+        {'A', 5},
+        {'B', 9},
+        {'C', 12},
+        {'D', 13},
+        {'E', 16},
+        {'F', 45}
+    };
+
+    // 构建哈夫曼树
+    HuffmanNode* root = buildHuffmanTree(frequencies);
+
+    // 生成哈夫曼编码
+    cout << "Huffman Codes:" << endl;
+    generateHuffmanCodes(root, "");
+
+    // 清理内存
+    deleteHuffmanTree(root);
+
+    return 0;
+}
