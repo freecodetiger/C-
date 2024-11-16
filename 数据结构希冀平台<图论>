@@ -1,0 +1,159 @@
+题目一：难点在于怎么读取，这里使用while(cin>>){}大括号内再获取两个参数
+#include<bits/stdc++.h>
+#include<queue>
+using namespace std;
+//求最远的节点距离
+const int N=110;
+const int M=6100;//最大边数
+//int arr[N];
+int dis[N];
+int n,k;
+int w[N][N];
+bool st[N];
+void spfa(int k){
+    memset(dis,0x3f,sizeof dis);
+    queue<int>q;
+    dis[k]=0;
+    q.push(k);
+    st[k]=true;
+    while(!q.empty()){
+        int x=q.front();
+        q.pop();
+        st[x]=false;
+        for(int i=1;i<=n;i++){
+            if(w[x][i]!=0x3f3f3f3f&&dis[i]>dis[x]+w[x][i]){
+                dis[i]=dis[x]+w[x][i];
+                if(!st[i]){
+                    q.push(i);
+                    st[i]=true;
+                }
+            }
+        }
+    }
+    int maxn=0;
+    for(int i=1;i<=n;i++){
+        if(dis[i]==0x3f3f3f3f){
+            cout<<"-1"<<endl;
+            return ;
+        }
+        maxn=max(maxn,dis[i]);
+    }
+    cout<<maxn<<endl;
+}
+int main(){
+    
+memset(w,0x3f,sizeof w);
+freopen("in.txt","r",stdin);
+cin>>n>>k;
+int m=0;
+while(cin>>m){
+    int x,y;
+    cin>>x>>y;
+    w[m][x]=y;
+}
+
+
+// int max=3;
+// while(max--){
+//     int a,b,c;
+//     cin>>a>>b>>c;
+//     w[a][b]=c;
+// }
+spfa(k);
+fclose(stdin);
+    return 0;
+}
+题目二：股票经纪人会对消息反应过度，由若干股票经纪人组成的一个股票经纪人社区，从一个股票经纪人传递消息另一个股票经纪人需要一定的时间，
+注意从A传递到B所花费的时间不一定与从B传递给A所花费的时间相同。你的任务是编写一个程序，
+该程序选择哪个股票经纪人作为消息的起点，以及该消息传播到整个股票经纪人社区所需的时间，该持续时间以最后一个人接收消息所需的时间来衡量。
+
+
+
+【输入形式】
+
+
+输入包含多组股票经纪人的数据，每组的第一行是股票经纪人数量n（1到100），每个人的编号从1到n。接下来每个股票经纪人对应一行，
+其格式是，他的联系人数量（m），后跟m对整数，分别为联系人编号和将消息传递给该联系人所花费的时间（以分钟为单位）。
+没有特殊的标点符号或间距规则。
+#include <iostream>
+#include <cstring>
+#include <vector>
+#include <queue>
+#include <climits>
+
+using namespace std;
+typedef pair<int,int> PII;
+const int N=110;
+bool st[N];
+int w[N][N];
+int dis[N];
+int n;//点数
+int dijkstra(int k){
+//求第k个点到其他所有点的最短路中最长的距离，如果有不可达则返回-1
+ memset(dis,0x3f,sizeof dis);
+ memset(st,false,sizeof st);
+ priority_queue<PII,vector<PII>,greater<PII>> heap;//小根堆
+ dis[k]=0;
+ heap.push({0,k});
+ while(!heap.empty()){
+    auto t=heap.top();
+    heap.pop();
+    int d=t.first;
+    int cur=t.second;
+    //auto [d,cur]=heap.top();
+    //heap.pop();
+    if(st[cur]) continue;
+    st[cur]=true;
+    for(int i=1;i<=n;++i){
+        if(w[cur][i]!=0x3f3f3f3f&&dis[i]>dis[cur]+w[cur][i]){
+            dis[i]=dis[cur]+w[cur][i];
+            heap.push({dis[i],i});
+        }
+    }
+ }
+ int res=0;
+ for(int i=1;i<=n;++i){
+    if(dis[i]==0x3f3f3f3f) return -1;
+    res=max(res,dis[i]);
+    //cout<<"dijkstrra:"<<"dis"<<i<<"="<<dis[i]<<endl;
+ }
+ return res;
+}
+
+int main() {
+    freopen("in.txt", "r", stdin);
+    
+    cin>>n;
+    //while (cin >> n) {
+        memset(w,0x3f,sizeof w);
+        for (int i = 1; i <= n; ++i) {
+            int m;
+            cin >> m;
+            for (int j = 0; j < m; ++j) {
+                int to, time;
+                cin >> to >> time;
+                w[i][to]=min(w[i][to],time);
+            }
+        }
+        
+        int bestBroker = -1;
+        int bestTime =0x3f3f3f3f;
+        
+        for (int i = 1; i <= n; ++i) {
+            int maxTime = dijkstra(i);
+            //cout<<"broker: "<<i<<" time: "<<maxTime<<endl;
+            // if (maxTime == -1) {
+            //      cout << "disjoint" << endl;
+            //      return 0;
+            // }
+            if (maxTime!=-1&&maxTime < bestTime) {
+                bestTime = maxTime;
+                bestBroker = i;
+            }
+        }
+        if(bestBroker==-1)cout<<"disjoint"<<endl;
+        else cout << bestBroker << " " << bestTime << endl;
+    //}
+    fclose(stdin);
+    return 0;
+}
