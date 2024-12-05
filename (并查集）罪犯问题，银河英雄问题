@@ -1,0 +1,95 @@
+//罪犯问题，优先选择愤怒值最大的囚犯，将它们视为敌人，这样就不会优先把他们放在一个监狱内
+//直到遇到一对仇人，但是他们已经在同一间监狱内，说明他们是不得已而住在一起，这就是答案，输出即可
+//多循环一圈，是因为如果没有遇到上述情况，可以输出0；{0,0,0}
+//并查集，这里维护边，优先考虑仇恨大的罪犯，将它们视为敌人，直到这两人无法再分到不同的房间
+#include <bits/stdc++.h>
+using namespace std;
+const int N=20100,M=100100;
+int n,m;
+int p[N],di[N];
+struct edge{
+    int a, b, w;
+    bool operator <(const edge& e)const{
+        return w>e.w; //仇恨大的优先
+    }
+}Edges[M];
+int find(int x){
+    if(x==p[x])return x;
+    return p[x]=find(p[x]);
+}
+void merge(int x,int y){
+    int fx=find(x),fy=find(y);
+    if(fx==fy)return;
+    p[fx]=fy;
+}
+int main(){
+cin>>n>>m;
+for(int i=1;i<=n;i++)p[i]=i;
+for(int i=0;i<m;i++){
+    int a,b,w;
+    cin>>a>>b>>w;
+    Edges[i]={a,b,w};
+}
+sort(Edges,Edges+m);
+for(int i=0;i<=m;i++){
+    int a=Edges[i].a,b=Edges[i].b,w=Edges[i].w;
+    if(find(a)==find(b)){cout<<w<<endl;break;}
+    else{
+        if(di[a]==0)di[a]=b;
+        else merge(di[a],b);
+        if(di[b]==0)di[b]=a;
+        else merge(di[b],a);
+    }
+}
+    return 0;
+}
+//银河英雄传说
+//这道题考察的是启发式合并和带权并查集
+//除了维护p[]集合，还要维护节点到根的距离d[]，因为这道题的merge是将某个集合的根节点移动到某个集合的尾部
+//所以同时维护一个s[]集合，表示某个集合的节点数量，s[]集合仅仅对根节点有效，只在merge()中进行修改
+//这样，p[fx]=fy;s[fy]+=s[fx];d[fx]=s[fy];这就可以正确除了merge(x,y)之后的节点关系了
+//由于路径压缩，所以在查询时，某个节点及其之上的节点的d[]就会被更新。
+#include<bits/stdc++.h>
+using namespace std;
+const int N=30010;
+int p[N],d[N],s[N];
+int T;
+void init(){
+    for(int i=1;i<N;i++){
+        p[i]=i;
+        d[i]=0;
+        s[i]=1;
+    }
+}
+int find(int x){
+if(x==p[x])return x;
+int root=find(p[x]);
+    d[x]+=d[p[x]];
+    return p[x]=root;//返回的是根节点，同时路径压缩
+}
+void merge(int x,int y){
+    int a=find(x),b=find(y);
+    if(a==b) return;
+    //因为这里有先后顺序，所以不需要保证树的矮胖
+    p[a]=b;
+    d[a]=s[b];
+    s[b]+=s[a];
+}
+int main(){
+    init();
+cin>>T;
+char s;
+int x,y;
+while(T--){
+    cin>>s>>x>>y;
+    if(s=='M'){
+        merge(x,y);
+        }else{
+        if(find(x)!=find(y))cout<<-1<<endl;
+        else{
+            cout<<abs(d[x]-d[y])-1<<endl;
+        }
+    }
+}
+    return 0;
+}
